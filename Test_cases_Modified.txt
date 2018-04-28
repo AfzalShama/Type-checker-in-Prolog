@@ -1,0 +1,75 @@
+%vars
+hastype([pair("x",intT), pair("y",intT)], var("x"), T).
+hastype([pair("x",boolT), pair("x",intT)], var("x"), T).
+
+%Constants
+hastype([], constInt(-652), T).
+hastype([], constBool(true), T).
+
+%arithmetic
+hastype([],add(subtract(constInt(2),constInt(5)), divide(constInt(6),multiply(constInt(2), constInt(5)))), T).
+
+%boolean
+hastype([pair("x",boolT)],and(implies(or(var("x"), constBool(false)), constBool(true)),implies(var("x"), not(constBool(false)))), T).
+
+%comparison
+hastype([pair("x",boolT),pair("y",boolT)], or(and(greater(constInt(-2), constInt(6)), lesser(constInt(3), constInt(100))),implies(equals(constInt(5), var("y")), var("x"))), T).
+
+%equality
+hastype([], equals(subtract(constInt(5),constInt(2)), add(constInt(1),constInt(2))), T).
+hastype([], equals(nTuple([nTuple([1,3]),true]),nTuple([1, 3,true])), T).
+
+%if then else
+hastype([pair("x",boolT),pair("y", intT)],ifte(and(var("x"),greater(var("y"),constInt(0))),var("y"),var("x")),T).
+
+%let d in e
+hastype([pair("y",intT)], def(defVar("x", constInt(3)),add(var("y"),var("x"))), T).
+hastype([pair("x", intT)], def(defVar("y",constInt(3)),multiply(var("y"),constInt(5))), T).
+
+%abstraction
+hastype( [pair("x", boolT), pair("w", boolT)], lambda("x", var("w")), arrow(boolT, boolT)). 
+hastype( [pair("x", boolT), pair("w", boolT)], lambda("x", var("w")), arrow(boolT, boolT)). 
+
+%application
+hastype([pair("r", arrow(boolT,boolT)), pair("s", boolT)], app(var("r"), var("s")), boolT).
+hastype([pair("r", arrow(boolT,boolT)), pair("s", boolT)], app(var("r"), var("s")), T).
+
+
+%n-tuple
+hastype([pair("x", boolT), pair("w", boolT)], nTuple([var("x"), var("w"), and(var("x"), var("y"))]), boolT).
+
+%projection
+hastype([pair("y", boolT), pair("z", boolT)], proj(1, nTuple([var("x"), var("w"), and(var("x"), var("y"))])), boolT).
+
+%constructors
+hastype([pair("r", boolT)] ,left(var("r")), boolT).
+hastype([pair("r", boolT)] ,left(var("r")), X).
+hastype([pair("r", boolT)] ,right(var("r")), boolT).
+
+%case analysis
+hastype([pair("t", boolT), pair("r", boolT)], case(left(var("t")), var("r")), boolT).
+hastype([pair("t", boolT), pair("r", boolT)], case(right(var("t")), var("r")), boolT).
+
+
+%type elaborates
+
+typeElaborates([], defVar("x",add(constInt(3), constInt(4))), G).
+typeElaborates([], defVar("y",constBool(true)), G).
+typeElaborates([], defOr(defVar("x", constInt(3)),defVar("y", constBool(true))), G).
+typeElaborates([], defOr(defVar("x", constInt(3)),defVar("x", consBool(true))), G).
+typeElaborates([], defCons(defVar("x",multiply(constInt(31), constInt(20))),defVar("y",constBool(true))), G).
+typeElaborates([pair("x", boolT),pair("y", intT)], defLocal( defVar("x",constInt(31)), defOr(defVar("x",nTuple([var("y")])),defVar("y",constBool(false)))), G).
+
+typeElaborates([pair("x", boolT),pair("y", intT)], defLocal( defVar("x",constInt(20)), defOr(defVar("x",constInt(3)),defVar("y",constBool(false)))), G).
+
+typeElaborates([pair("x", intT)],defVar("y",constInt(9)),Gamma).
+
+typeElaborates([pair("x", intT)],defCons(defVar("z",constBool(true)),defVar("y",constBool(false))),Gamma).
+
+typeElaborates([pair("x", intT)],defOr(defVar("z",constInt(9)),defVar("y",constInt(0))),Gamma).
+
+typeElaborates([pair("x", intT)],defLocal(defVar("z",constInt(9)),defVar("y",constInt(4))),Gamma).
+
+typeElaborates([pair("x", intT)],defOr(defCons(defVar("z",constInt(8)),defVar("y",constBool(true))),defVar("y",constBool(false))),Gamma).
+
+typeElaborates([pair("x", intT)],defCons(defOr(defVar("z",constInt(45)),defVar("y",constBool(false))),defVar("y",constInt(8))),Gamma).
